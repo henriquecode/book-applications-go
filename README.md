@@ -1,2 +1,3 @@
-# estudo-go-lang
-Estudos com Go
+# Aplicações com Go
+
+Praticando Go com aplicações!!
