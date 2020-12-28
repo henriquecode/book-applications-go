@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"text/template"
 
 	"github.com/cristalhq/jwt"
@@ -26,7 +25,6 @@ type book struct {
 }
 
 type userClaims struct {
-	jwt.RegisteredClaims
 	IsAdmin bool   `json:"is_admin"`
 	Email   string `json:"email"`
 	ID      int    `json:"id"`
@@ -82,15 +80,18 @@ func setRoutes() {
 			user, ok := getUserByEmailPassword(email, password)
 
 			if ok == false {
-				view(w, "login", map[string]interface{}{
-					"Sucess":  false,
-					"Message": "Usuário não encontrado",
+				view(w, "login", struct {
+					Sucess  bool
+					Message string
+				}{
+					false,
+					"Usuário não encontrado",
 				})
 			} else {
 				token := generateToken(user)
 
-				view(w, "token", map[string]string{
-					"Token": token,
+				view(w, "token", struct{ Token string }{
+					token,
 				})
 			}
 		}
@@ -118,9 +119,12 @@ func setRoutes() {
 		dataUser, ok := getUserByID(formatUser.ID)
 
 		if ok == false {
-			view(w, "info", map[string]interface{}{
-				"Sucess":  false,
-				"Message": "Usuário não encontrado",
+			view(w, "info", struct {
+				Sucess  bool
+				Message string
+			}{
+				false,
+				"Usuário não encontrado",
 			})
 		} else {
 			view(w, "info", struct {
@@ -145,9 +149,6 @@ func generateToken(u user) string {
 	builder := jwt.NewBuilder(signer)
 
 	claims := &userClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			ID: strconv.Itoa(u.id),
-		},
 		IsAdmin: true,
 		Email:   u.Email,
 		ID:      u.id,
